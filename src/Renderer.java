@@ -1,5 +1,3 @@
-package lvl1basic.p01start.p07utils;
-
 import com.jogamp.opengl.*;
 
 import oglutils.OGLBuffers;
@@ -66,8 +64,8 @@ public class Renderer implements GLEventListener, MouseListener,
 
         textRenderer = new OGLTextRenderer(gl, glDrawable.getSurfaceWidth(), glDrawable.getSurfaceHeight());
 
-        shaderProgram = ShaderUtils.loadProgram(gl, "/lvl1basic/p01start/p07utils/start.vert",
-                "/lvl1basic/p01start/p07utils/start.frag",
+        shaderProgram = ShaderUtils.loadProgram(gl, "/start.vert",
+                "/start.frag",
                 null, null, null, null);
 
         createBuffers(gl);

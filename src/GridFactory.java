@@ -1,5 +1,3 @@
-package lvl1basic.p01start.p07utils;
-
 import com.jogamp.opengl.GL2GL3;
 import oglutils.OGLBuffers;
 
