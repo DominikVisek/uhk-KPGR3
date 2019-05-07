@@ -1,15 +1,15 @@
 import com.jogamp.opengl.GL2GL3;
 import oglutils.OGLBuffers;
 
-public class GridFactory {
+class GridFactory {
 
     /**
-     * @param gl
+     * @param gl gl context
      * @param m  počet vrcholů v řádku
      * @param n  počet vrcholů ve sloupci
-     * @return
+     * @return OGLBuffers
      */
-    public static OGLBuffers generateGrid(GL2GL3 gl, int m, int n) {
+    static OGLBuffers generateGrid(GL2GL3 gl, int m, int n) {
         float[] vb = new float[m * n * 2];
         int index = 0;
         for (int j = 0; j < n; j++) {
@@ -36,7 +36,7 @@ public class GridFactory {
         }
 
         OGLBuffers.Attrib[] attributes = {
-new OGLBuffers.Attrib("inPosition", 2) // 2 floats
+                new OGLBuffers.Attrib("inPosition", 2) // 2 floats
         };
 
         return new OGLBuffers(gl, vb, attributes, ib);

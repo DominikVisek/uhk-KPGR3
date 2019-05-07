@@ -1,11 +1,19 @@
 #version 150
-in vec2 inPosition; // input from the vertex buffer
-//in vec3 inColor; // input from the vertex buffer
-out vec3 vertColor; // output from this shader to the next pipeline stage
-uniform float time; // variable constant for all vertices in a single draw
+in vec2 inPosition;
 
-uniform mat4 proj;
+uniform mat4 projection;
 uniform mat4 view;
+uniform vec3 lightPosition;
+uniform float time;
+uniform int mode;
+uniform mat4 lightVP;
+
+out vec4 depthTexCoord;
+out vec2 texCoord;
+out vec3 normal;
+out vec3 light;
+out vec3 viewDirection;
+out vec3 NdotL;
 
 const float PI = 3.14;
 
@@ -21,6 +29,24 @@ vec3 getSphere(vec2 xy) {
     return vec3(x, y, z);
 }
 
+vec3 getSphereNormal(vec2 xy) {
+    vec3 u = getSphere(xy + vec2(0.001, 0)) - getSphere(xy - vec2(0.001, 0));
+    vec3 v = getSphere(xy + vec2(0, 0.001)) - getSphere(xy - vec2(0, 0.001));
+    return cross(u, v);
+}
+
+vec3 getWall(vec2 xy) {
+    return vec3(xy, 1.0); // posuneme po ose "z" o 1
+}
+
+vec3 getWallNormal(vec2 xy) {
+    vec3 u = getWall(xy + vec2(0.001, 0)) - getWall(xy - vec2(0.001, 0));
+    vec3 v = getWall(xy + vec2(0, 0.001)) - getWall(xy - vec2(0, 0.001));
+    return cross(u, v);
+}
+
+// ___________________________________________________________
+
 vec3 getSphplot(vec2 xy) {
     float rho = 1;
     float phi = xy.x * PI;
@@ -32,6 +58,12 @@ vec3 getSphplot(vec2 xy) {
     return vec3(x, y, z);
 }
 
+vec3 getSphplotNormal(vec2 xy) {
+    vec3 u = getSphplot(xy + vec2(0.001, 0)) - getSphplot(xy - vec2(0.001, 0));
+    vec3 v = getSphplot(xy + vec2(0, 0.001)) - getSphplot(xy - vec2(0, 0.001));
+    return cross(u, v);
+}
+
 vec3 getSphplot2(vec2 xy) {
     float s= PI * 0.2 - PI * xy.x * 4 + 12;
     float t= PI * 0.2 - PI * xy.y * 4 + 12;
@@ -39,6 +71,12 @@ vec3 getSphplot2(vec2 xy) {
     float r = 1 + sin(t)/2;
 
     return vec3(r*cos(s), r*sin(s), t);
+}
+
+vec3 getSphplot2Normal(vec2 xy) {
+    vec3 u = getSphplot2(xy + vec2(0.001, 0)) - getSphplot2(xy - vec2(0.001, 0));
+    vec3 v = getSphplot2(xy + vec2(0, 0.001)) - getSphplot2(xy - vec2(0, 0.001));
+    return cross(u, v);
 }
 
 vec3 getSombrero(vec2 xy) {
@@ -51,6 +89,12 @@ vec3 getSombrero(vec2 xy) {
     2*sin(t))/2;
 }
 
+vec3 getSombreroNormal(vec2 xy) {
+    vec3 u = getSombrero(xy + vec2(0.001, 0)) - getSombrero(xy - vec2(0.001, 0));
+    vec3 v = getSombrero(xy + vec2(0, 0.001)) - getSombrero(xy - vec2(0, 0.001));
+    return cross(u, v);
+}
+
 vec3 getCylin(vec2 xy) {
     float r = 1;
     float theta = xy.y * (2 * PI);
@@ -59,6 +103,12 @@ vec3 getCylin(vec2 xy) {
     float x = r * cos(theta);
     float y = r * sin(theta);
     return vec3(x, y, z);
+}
+
+vec3 getCylinNormal(vec2 xy) {
+    vec3 u = getCylin(xy + vec2(0.001, 0)) - getCylin(xy - vec2(0.001, 0));
+    vec3 v = getCylin(xy + vec2(0, 0.001)) - getCylin(xy - vec2(0, 0.001));
+    return cross(u, v);
 }
 
 vec3 getParsur(vec2 xy) {
@@ -71,6 +121,12 @@ vec3 getParsur(vec2 xy) {
     return vec3(x, y, z);
 }
 
+vec3 getParsurNormal(vec2 xy) {
+    vec3 u = getParsur(xy + vec2(0.001, 0)) - getParsur(xy - vec2(0.001, 0));
+    vec3 v = getParsur(xy + vec2(0, 0.001)) - getParsur(xy - vec2(0, 0.001));
+    return cross(u, v);
+}
+
 vec3 getModifiedSphere(vec2 xy) {
     float r = 3/2;
     float s = (PI * 10 - PI * xy.y * 2) - 1;
@@ -78,24 +134,61 @@ vec3 getModifiedSphere(vec2 xy) {
     return vec3(r * cos(t) * cos(s), r * cos(t) * sin(s), r * sin(t));
 }
 
+vec3 getModifiedSphereNormal(vec2 xy) {
+    vec3 u = getModifiedSphere(xy + vec2(0.001, 0)) - getModifiedSphere(xy - vec2(0.001, 0));
+    vec3 v = getModifiedSphere(xy + vec2(0, 0.001)) - getModifiedSphere(xy - vec2(0, 0.001));
+    return cross(u, v);
+}
+
 void main() {
     vec2 pos = inPosition * 2 - 1;
-    vec2 position = inPosition;
+    vec2 position = inPosition * 2 - 1;
+    vec3 finalPos;
 
-    //	  vec3 shape = getSphere(pos);
+    // Alespoň jednu z funkcí modifikujte v čase pomocí uniform proměnné.
+//    pos.y += cos(pos.y + (time / 2));
 
-    //    vec3 shape = getSphplot(pos * position.y);
-    //    vec3 shape = getSphplot2(pos);
+    if (mode == 0) {
+        finalPos = getWall(position);
+        normal = getWallNormal(position);
+    } else {
 
-    //    vec3 shape = getCylin(pos);
-    //    vec3 shape = getSombrero(pos);
+        // parsur tvar
+        finalPos = getParsur(pos);
+        normal = getParsurNormal(pos);
 
-    //    vec3 shape = getParsur(pos);
-    //    vec3 shape = getModifiedSphere(pos);
+        // další tvary + tvar ze cvičení
 
-    position.x += 0.1;
-    position.y += cos(position.y);
-    vertColor = shape;
+//        finalPos = getModifiedSphere(pos);
+//        normal = getModifiedSphereNormal(pos);
+//
+//        finalPos = getSphere(pos);
+//        normal = getSphereNormal(pos);
+//
+//        finalPos = getModifiedSphere(pos);
+//        normal = getModifiedSphereNormal(pos);
+//
+//        finalPos = getModifiedSphere(pos);
+//        normal = getModifiedSphereNormal(pos);
+//
+//        finalPos = getSphlot(pos);
+//        normal = getSphlotNormal(pos);
+//
+//        finalPos = getSphlot2(pos);
+//        normal = getSphlotNormal2(pos);
+    }
 
-	gl_Position = proj * view * vec4(shape, 1.0);
-} 
+    gl_Position = projection * view * vec4(finalPos, 1.0);
+    light = lightPosition - finalPos;
+    NdotL = vec3(dot(normal, light));
+
+    mat4 invView = inverse(view);
+    vec3 eyePosition = vec3(invView[3][0], invView[3][1], invView[3][2]);
+
+    viewDirection = eyePosition - finalPos;
+
+    texCoord = inPosition;
+
+    depthTexCoord = lightVP * vec4(finalPos, 1.0);
+    depthTexCoord.xyz = (depthTexCoord.xyz + 1) / 2; // obrazovka má rozsahy <-1;1>
+}
