@@ -4,6 +4,7 @@ in vec2 inPosition; // input from the vertex buffer
 uniform mat4 viewLight;
 uniform mat4 projLight;
 uniform int mode;
+uniform float time;
 
 const float PI = 3.1415;
 
@@ -76,11 +77,17 @@ vec3 getModifiedSphere(vec2 xy) {
     return vec3(r * cos(t) * cos(s), r * cos(t) * sin(s), r * sin(t));
 }
 
+vec3 getWall(vec2 xy) {
+    return vec3(xy * 2, -2.0); // posuneme po ose "z" o 1
+}
+
 void main() {
     vec2 pos = inPosition * 2 - 1; // máme od 0 do 1 a chceme od -1 do 1 (funkce pro ohyb gridu s tím počítají)
+    vec2 position = inPosition * 2 - 1;
+    pos.x += cos(pos.x + (time / 2));
     vec3 finalPos;
     if (mode == 0) { // mode 0 je stínící plocha
-        finalPos = vec3(pos, 1.0); // posuneme po ose "z" o 1
+        finalPos = getWall(position); // posuneme po ose "z" o 1
     } else { // mode 1 je koule
         finalPos = getParsur(pos);
     }

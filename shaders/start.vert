@@ -36,7 +36,7 @@ vec3 getSphereNormal(vec2 xy) {
 }
 
 vec3 getWall(vec2 xy) {
-    return vec3(xy, 1.0); // posuneme po ose "z" o 1
+    return vec3(xy * 2, -2.0); // posuneme po ose "z" o 1
 }
 
 vec3 getWallNormal(vec2 xy) {
@@ -146,7 +146,7 @@ void main() {
     vec3 finalPos;
 
     // Alespoň jednu z funkcí modifikujte v čase pomocí uniform proměnné.
-//    pos.y += cos(pos.y + (time / 2));
+    pos.x += cos(pos.x + (time / 2));
 
     if (mode == 0) {
         finalPos = getWall(position);

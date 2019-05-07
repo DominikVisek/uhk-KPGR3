@@ -33,8 +33,8 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
     private OGLTexture2D.Viewer textureViewer;
     private OGLTexture2D texture;
 
-    private int shaderProgramViewer, locTime, locView, locProjection, locMode, locLightVP, locEyePosition, locLightPosition;
-    private int shaderProgramLight, locLightView, locLightProj, locModeLight;
+    private int shaderProgramViewer, locTimeViewer, locView, locProjection, locMode, locLightVP, locEyePosition, locLightPosition;
+    private int shaderProgramLight,locTimeLight, locLightView, locLightProj, locModeLight;
 
     private Mat4 projViewer, projLight;
     private float time = 0;
@@ -77,9 +77,11 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
 
         // vytvoření kamery (světlo)
         lightCamera = new Camera()
-                .withPosition(new Vec3D(5, 5, 5))
+                .withPosition(new Vec3D(0, 0, 0))
                 .addAzimuth(5 / 4. * Math.PI)//-3/4.
-                .addZenith(-1 / 5. * Math.PI);
+                .addZenith(-1 / 5. * Math.PI)
+                .withFirstPerson(false)
+                .withRadius(5);
 
         // vytvoření kamery (uživatel)
         camera = new Camera()
@@ -89,7 +91,7 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
                 .withFirstPerson(false)
                 .withRadius(5);
 
-        locTime = gl.glGetUniformLocation(shaderProgramViewer, "time");
+        locTimeViewer = gl.glGetUniformLocation(shaderProgramViewer, "time");
         locMode = gl.glGetUniformLocation(shaderProgramViewer, "mode");
         locView = gl.glGetUniformLocation(shaderProgramViewer, "view");
         locProjection = gl.glGetUniformLocation(shaderProgramViewer, "projection");
@@ -100,6 +102,7 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
         locLightProj = gl.glGetUniformLocation(shaderProgramLight, "projLight");
         locLightView = gl.glGetUniformLocation(shaderProgramLight, "viewLight");
         locModeLight = gl.glGetUniformLocation(shaderProgramLight, "mode");
+        locTimeLight = gl.glGetUniformLocation(shaderProgramLight, "time");
 
         texture = new OGLTexture2D(gl, "/textures/mosaic.jpg");
         textureViewer = new OGLTexture2D.Viewer(gl);
@@ -110,6 +113,9 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
     @Override
     public void display(GLAutoDrawable glDrawable) {
         GL2GL3 gl = glDrawable.getGL().getGL2GL3();
+
+        time += 0.1;
+        lightCamera = lightCamera.addAzimuth(0.01);
 
         renderFromLight(gl);
         renderFromViewer(gl);
@@ -144,6 +150,8 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
         gl.glClearColor(0.3f, 0.0f, 0.0f, 1.0f);
         gl.glClear(GL2GL3.GL_COLOR_BUFFER_BIT | GL2GL3.GL_DEPTH_BUFFER_BIT);
 
+        gl.glUniform1f(locTimeLight, time);
+
         gl.glUniformMatrix4fv(locLightView, 1, false, lightCamera.getViewMatrix().floatArray(), 0);
         gl.glUniformMatrix4fv(locLightProj, 1, false, projLight.floatArray(), 0);
 
@@ -169,8 +177,7 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
         gl.glClearColor(0.0f, 0.3f, 0.0f, 1.0f);
         gl.glClear(GL2GL3.GL_COLOR_BUFFER_BIT | GL2GL3.GL_DEPTH_BUFFER_BIT);
 
-        time += 0.1;
-        gl.glUniform1f(locTime, time);
+        gl.glUniform1f(locTimeViewer, time);
 
         if (withBorder) {
             gl.glPolygonMode(GL2GL3.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
