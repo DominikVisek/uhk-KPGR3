@@ -164,6 +164,11 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
         // renderuj elipsoid
         gl.glUniform1i(locModeLight, 1);
         buffers.draw(GL2GL3.GL_TRIANGLES, shaderProgramLight);
+
+        // renderuj elipsoid
+        gl.glUniform1i(locModeLight, 2);
+        buffers.draw(GL2GL3.GL_TRIANGLES, shaderProgramLight);
+
         //triangles strip
         //buffers.draw(GL2GL3.GL_TRIANGLE_STRIP, shaderProgramLight);
     }
@@ -199,8 +204,12 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
         gl.glUniform1i(locMode, 0);
         buffers.draw(GL2GL3.GL_TRIANGLES, shaderProgramViewer);
 
-        // renderuj elipsoid
+        // renderuj objekt 1
         gl.glUniform1i(locMode, 1);
+        buffers.draw(GL2GL3.GL_TRIANGLES, shaderProgramViewer);
+
+        // renderuj objekt 2
+        gl.glUniform1i(locMode, 2);
         buffers.draw(GL2GL3.GL_TRIANGLES, shaderProgramViewer);
     }
 

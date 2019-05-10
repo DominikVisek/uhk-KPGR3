@@ -131,7 +131,12 @@ vec3 getModifiedSphere(vec2 xy) {
     float r = 3/2;
     float s = (PI * 10 - PI * xy.y * 2) - 1;
     float t = 10 * PI * xy.x;
-    return vec3(r * cos(t) * cos(s), r * cos(t) * sin(s), r * sin(t));
+
+    float x = r * cos(t) * cos(s);
+    float y = r * cos(t) * sin(s);
+    float z = r * sin(t);
+
+    return vec3(x+2, y+0.5, z);
 }
 
 vec3 getModifiedSphereNormal(vec2 xy) {
@@ -151,8 +156,10 @@ void main() {
     if (mode == 0) {
         finalPos = getWall(position);
         normal = getWallNormal(position);
+    } else if (mode == 1){
+        finalPos = getModifiedSphere(position);
+        normal = getModifiedSphereNormal(position);
     } else {
-
         // parsur tvar
         finalPos = getParsur(pos);
         normal = getParsurNormal(pos);

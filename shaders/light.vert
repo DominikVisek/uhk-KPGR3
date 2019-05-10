@@ -74,7 +74,12 @@ vec3 getModifiedSphere(vec2 xy) {
     float r = 3/2;
     float s = (PI * 10 - PI * xy.y * 2) - 1;
     float t = 10 * PI * xy.x;
-    return vec3(r * cos(t) * cos(s), r * cos(t) * sin(s), r * sin(t));
+
+    float x = r * cos(t) * cos(s);
+    float y = r * cos(t) * sin(s);
+    float z = r * sin(t);
+
+    return vec3(x+2, y+0.5, z);
 }
 
 vec3 getWall(vec2 xy) {
@@ -88,6 +93,8 @@ void main() {
     vec3 finalPos;
     if (mode == 0) { // mode 0 je stínící plocha
         finalPos = getWall(position); // posuneme po ose "z" o 1
+    }else if(mode == 1){
+        finalPos = getModifiedSphere(position);
     } else { // mode 1 je koule
         finalPos = getParsur(pos);
     }
