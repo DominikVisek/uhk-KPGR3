@@ -25,7 +25,7 @@ import java.awt.event.*;
 public class Renderer implements GLEventListener, MouseListener, MouseMotionListener, KeyListener {
 
     private int width, height;
-    private boolean withBorder = false;
+    private boolean withBorder = false; // přepinač signalizující zobrazení hran
 
     private OGLBuffers buffers;
     private OGLTextRenderer textRenderer;
@@ -34,15 +34,15 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
     private OGLTexture2D texture;
 
     private int shaderProgramViewer, locTimeViewer, locView, locProjection, locMode, locLightVP, locEyePosition, locLightPosition;
-    private int shaderProgramLight,locTimeLight, locLightView, locLightProj, locModeLight;
+    private int shaderProgramLight, locTimeLight, locLightView, locLightProj, locModeLight;
 
     private Mat4 projViewer, projLight;
     private float time = 0;
     private Camera camera, lightCamera;
     private int mx, my;
     private String text;
-    private Robot robot;
-    private Color color;
+    private Robot robot; // pro zjištění barvy
+    private Color color; // barva do textového výpisu
 
     @Override
     public void init(GLAutoDrawable glDrawable) {
@@ -69,6 +69,7 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
         gl.glPolygonMode(GL2GL3.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);// vyplnění přivrácených i odvrácených stran
         gl.glEnable(GL2GL3.GL_DEPTH_TEST); // zapnout z-test
 
+        // načtení souborů (shaders)
         shaderProgramLight = ShaderUtils.loadProgram(gl, "/light");
         shaderProgramViewer = ShaderUtils.loadProgram(gl, "/start");
 
@@ -114,6 +115,7 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
     public void display(GLAutoDrawable glDrawable) {
         GL2GL3 gl = glDrawable.getGL().getGL2GL3();
 
+        // posun světla
         time += 0.1;
         lightCamera = lightCamera.addAzimuth(0.01);
 
@@ -155,22 +157,21 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
         gl.glUniformMatrix4fv(locLightView, 1, false, lightCamera.getViewMatrix().floatArray(), 0);
         gl.glUniformMatrix4fv(locLightProj, 1, false, projLight.floatArray(), 0);
 
-        // renderuj stěnu
+        // renderuj stěnu + ZAKOMENTOVANÝ GL_TRIANGLE_STRIP
         gl.glUniform1i(locModeLight, 0);
         buffers.draw(GL2GL3.GL_TRIANGLES, shaderProgramLight);
-        //triangles strip
         //buffers.draw(GL2GL3.GL_TRIANGLE_STRIP, shaderProgramLight);
 
-        // renderuj elipsoid
+        // renderuj modifiedSphere + ZAKOMENTOVANÝ GL_TRIANGLE_STRIP
         gl.glUniform1i(locModeLight, 1);
         buffers.draw(GL2GL3.GL_TRIANGLES, shaderProgramLight);
+        // buffers.draw(GL2GL3.GL_TRIANGLE_STRIP, shaderProgramLight);
 
-        // renderuj elipsoid
+        // renderuj parsur + ZAKOMENTOVANÝ GL_TRIANGLE_STRIP
         gl.glUniform1i(locModeLight, 2);
         buffers.draw(GL2GL3.GL_TRIANGLES, shaderProgramLight);
+        // buffers.draw(GL2GL3.GL_TRIANGLE_STRIP, shaderProgramLight);
 
-        //triangles strip
-        //buffers.draw(GL2GL3.GL_TRIANGLE_STRIP, shaderProgramLight);
     }
 
     private void renderFromViewer(GL2GL3 gl) {
@@ -184,6 +185,7 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
 
         gl.glUniform1f(locTimeViewer, time);
 
+        // zobrazená obrysů trojuhelníku na základě hodnoty withBorder -> klávesa B
         if (withBorder) {
             gl.glPolygonMode(GL2GL3.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
         } else {
@@ -197,20 +199,23 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
         gl.glUniform3fv(locLightPosition, 1, ToFloatArray.convert(lightCamera.getPosition()), 0);
 
         texture.bind(shaderProgramViewer, "textureID", 0);
-//        renderTarget.getColorTexture().bind(shaderProgramViewer, "colorTexture", 0);
+        // renderTarget.getColorTexture().bind(shaderProgramViewer, "colorTexture", 0);
         renderTarget.getDepthTexture().bind(shaderProgramViewer, "depthTexture", 1);
 
-        // renderuj stěnu
+        // renderuj stěnu + ZAKOMENTOVANÝ GL_TRIANGLE_STRIP
         gl.glUniform1i(locMode, 0);
         buffers.draw(GL2GL3.GL_TRIANGLES, shaderProgramViewer);
+        // buffers.draw(GL2GL3.GL_TRIANGLE_STRIP, shaderProgramViewer);
 
-        // renderuj objekt 1
+        // renderuj modifiedSphere + ZAKOMENTOVANÝ GL_TRIANGLE_STRIP
         gl.glUniform1i(locMode, 1);
         buffers.draw(GL2GL3.GL_TRIANGLES, shaderProgramViewer);
+        // buffers.draw(GL2GL3.GL_TRIANGLE_STRIP, shaderProgramViewer);
 
-        // renderuj objekt 2
+        // renderuj parsur + ZAKOMENTOVANÝ GL_TRIANGLE_STRIP
         gl.glUniform1i(locMode, 2);
         buffers.draw(GL2GL3.GL_TRIANGLES, shaderProgramViewer);
+        // buffers.draw(GL2GL3.GL_TRIANGLE_STRIP, shaderProgramViewer);
     }
 
     @Override
@@ -246,6 +251,7 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
 
     @Override
     public void mousePressed(MouseEvent e) {
+        // uložení ouřadnic kliknutí -> ovládání kamery myší -> mouseDragged
         mx = e.getX();
         my = e.getY();
     }
@@ -256,6 +262,7 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
 
     @Override
     public void mouseDragged(MouseEvent e) {
+        // ovládání kamery myší
         camera = camera.addAzimuth(Math.PI * (mx - e.getX()) / width);
         camera = camera.addZenith(Math.PI * (e.getY() - my) / width);
         mx = e.getX();
@@ -264,6 +271,7 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
 
     @Override
     public void mouseMoved(MouseEvent e) {
+        // Vypisování informací o pixelech(barva, pozice x, pozice y, hloubka barvy, RGB)
         color = robot.getPixelColor(e.getX(), e.getY());
         String colorText = "Red: " + color.getRed() +
                 "Green: " + color.getGreen() +
@@ -275,6 +283,7 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
 
     @Override
     public void keyPressed(KeyEvent e) {
+        // ovládání kamery klávesnicí
         switch (e.getKeyCode()) {
             case KeyEvent.VK_W:
                 camera = camera.forward(1);

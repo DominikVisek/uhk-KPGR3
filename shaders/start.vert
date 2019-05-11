@@ -20,7 +20,7 @@ const float PI = 3.14;
 // ohnutí gridu do podoby koule
 vec3 getSphere(vec2 xy) {
     float az = xy.x * PI;
-    float ze = xy.y * PI/2; // máme od -1 do 1 a chceme od -PI/2 do PI/2
+    float ze = xy.y * PI/2;// máme od -1 do 1 a chceme od -PI/2 do PI/2
     float r = 1;
 
     float x = cos(az)*cos(ze)*r;
@@ -36,7 +36,7 @@ vec3 getSphereNormal(vec2 xy) {
 }
 
 vec3 getWall(vec2 xy) {
-    return vec3(xy * 2, -2.0); // posuneme po ose "z" o 1
+    return vec3(xy * 2, -2.0);// posuneme po ose "z" o 1
 }
 
 vec3 getWallNormal(vec2 xy) {
@@ -102,12 +102,14 @@ vec3 getCylin(vec2 xy) {
 
     float x = r * cos(theta);
     float y = r * sin(theta);
+
     return vec3(x, y, z);
 }
 
 vec3 getCylinNormal(vec2 xy) {
     vec3 u = getCylin(xy + vec2(0.001, 0)) - getCylin(xy - vec2(0.001, 0));
     vec3 v = getCylin(xy + vec2(0, 0.001)) - getCylin(xy - vec2(0, 0.001));
+
     return cross(u, v);
 }
 
@@ -124,6 +126,7 @@ vec3 getParsur(vec2 xy) {
 vec3 getParsurNormal(vec2 xy) {
     vec3 u = getParsur(xy + vec2(0.001, 0)) - getParsur(xy - vec2(0.001, 0));
     vec3 v = getParsur(xy + vec2(0, 0.001)) - getParsur(xy - vec2(0, 0.001));
+
     return cross(u, v);
 }
 
@@ -142,10 +145,12 @@ vec3 getModifiedSphere(vec2 xy) {
 vec3 getModifiedSphereNormal(vec2 xy) {
     vec3 u = getModifiedSphere(xy + vec2(0.001, 0)) - getModifiedSphere(xy - vec2(0.001, 0));
     vec3 v = getModifiedSphere(xy + vec2(0, 0.001)) - getModifiedSphere(xy - vec2(0, 0.001));
+
     return cross(u, v);
 }
 
 void main() {
+    // 2x pozice, protože pos je modifikována v čase
     vec2 pos = inPosition * 2 - 1;
     vec2 position = inPosition * 2 - 1;
     vec3 finalPos;
@@ -154,35 +159,37 @@ void main() {
     pos.x += cos(pos.x + (time / 2));
 
     if (mode == 0) {
+        // mode 0 stěna
         finalPos = getWall(position);
         normal = getWallNormal(position);
     } else if (mode == 1){
+        // mode 1 modifiedsphere
         finalPos = getModifiedSphere(position);
         normal = getModifiedSphereNormal(position);
     } else {
-        // parsur tvar
+        // mode 2 parsur
         finalPos = getParsur(pos);
         normal = getParsurNormal(pos);
 
         // další tvary + tvar ze cvičení
 
-//        finalPos = getModifiedSphere(pos);
-//        normal = getModifiedSphereNormal(pos);
-//
-//        finalPos = getSphere(pos);
-//        normal = getSphereNormal(pos);
-//
-//        finalPos = getModifiedSphere(pos);
-//        normal = getModifiedSphereNormal(pos);
-//
-//        finalPos = getModifiedSphere(pos);
-//        normal = getModifiedSphereNormal(pos);
-//
-//        finalPos = getSphlot(pos);
-//        normal = getSphlotNormal(pos);
-//
-//        finalPos = getSphlot2(pos);
-//        normal = getSphlotNormal2(pos);
+        //        finalPos = getModifiedSphere(pos);
+        //        normal = getModifiedSphereNormal(pos);
+        //
+        //        finalPos = getSphere(pos);
+        //        normal = getSphereNormal(pos);
+        //
+        //        finalPos = getModifiedSphere(pos);
+        //        normal = getModifiedSphereNormal(pos);
+        //
+        //        finalPos = getModifiedSphere(pos);
+        //        normal = getModifiedSphereNormal(pos);
+        //
+        //        finalPos = getSphlot(pos);
+        //        normal = getSphlotNormal(pos);
+        //
+        //        finalPos = getSphlot2(pos);
+        //        normal = getSphlotNormal2(pos);
     }
 
     gl_Position = projection * view * vec4(finalPos, 1.0);
@@ -197,5 +204,5 @@ void main() {
     texCoord = inPosition;
 
     depthTexCoord = lightVP * vec4(finalPos, 1.0);
-    depthTexCoord.xyz = (depthTexCoord.xyz + 1) / 2; // obrazovka má rozsahy <-1;1>
+    depthTexCoord.xyz = (depthTexCoord.xyz + 1) / 2;// obrazovka má rozsahy <-1;1>
 }

@@ -1,5 +1,5 @@
 #version 150
-in vec2 inPosition; // input from the vertex buffer
+in vec2 inPosition;// input from the vertex buffer
 
 uniform mat4 viewLight;
 uniform mat4 projLight;
@@ -11,7 +11,7 @@ const float PI = 3.1415;
 // ohnutí gridu do podoby elipsoidu
 vec3 getSphere(vec2 xy) {
     float az = xy.x * PI;
-    float ze = xy.y * PI/2; // máme od -1 do 1 a chceme od -PI/2 do PI/2
+    float ze = xy.y * PI/2;// máme od -1 do 1 a chceme od -PI/2 do PI/2
     float r = 1;
 
     float x = cos(az)*cos(ze)*r;
@@ -83,20 +83,24 @@ vec3 getModifiedSphere(vec2 xy) {
 }
 
 vec3 getWall(vec2 xy) {
-    return vec3(xy * 2, -2.0); // posuneme po ose "z" o 1
+    return vec3(xy * 2, -2.0);// posuneme po ose "z" o 1
 }
 
 void main() {
-    vec2 pos = inPosition * 2 - 1; // máme od 0 do 1 a chceme od -1 do 1 (funkce pro ohyb gridu s tím počítají)
+    vec2 pos = inPosition * 2 - 1;// máme od 0 do 1 a chceme od -1 do 1 (funkce pro ohyb gridu s tím počítají)
     vec2 position = inPosition * 2 - 1;
     pos.x += cos(pos.x + (time / 2));
     vec3 finalPos;
-    if (mode == 0) { // mode 0 je stínící plocha
-        finalPos = getWall(position); // posuneme po ose "z" o 1
-    }else if(mode == 1){
+    if (mode == 0) {
+        // mode 0 je stínící plocha
+        finalPos = getWall(position);// posuneme po ose "z" o 1
+    } else if (mode == 1){
+        // mode 1 modified sphere
         finalPos = getModifiedSphere(position);
-    } else { // mode 1 je koule
+    } else {
+        // mode 2 parsur
         finalPos = getParsur(pos);
     }
-	gl_Position = projLight * viewLight * vec4(finalPos, 1.0);
+
+    gl_Position = projLight * viewLight * vec4(finalPos, 1.0);
 } 
