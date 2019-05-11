@@ -225,8 +225,10 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
         textRenderer.updateSize(width, height);
 
         double ratio = height / (double) width;
+        // light ortogonální projekce
         projLight = new Mat4OrthoRH(5 / ratio, 5, 0.1, 20);
-//        projViewer = new Mat4OrthoRH(5 / ratio, 5, 0.1, 20);
+
+        // viewer perspektivní projekce
         projViewer = new Mat4PerspRH(Math.PI / 3, ratio, 1, 20.0);
     }
 
