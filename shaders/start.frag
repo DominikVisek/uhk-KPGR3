@@ -14,7 +14,7 @@ uniform sampler2D depthTexture;
 out vec4 outColor;// (vždy jediný) výstup z fragment shaderu
 
 void main() {
-    vec4 ambient = vec4(1.0, 0.0, 0.0, 1.0);
+    vec4 ambient = vec4(0.5, 0.0, 0.0, 1.0);
     vec4 diffuse = vec4(normalize(NdotL) * vec3(0.0, 1.0, 0.0), 1.0);
 
     vec3 halfVector = normalize(normalize(light) + normalize(viewDirection));

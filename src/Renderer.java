@@ -199,8 +199,8 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
         gl.glUniform3fv(locLightPosition, 1, ToFloatArray.convert(lightCamera.getPosition()), 0);
 
         texture.bind(shaderProgramViewer, "textureID", 0);
-        // renderTarget.getColorTexture().bind(shaderProgramViewer, "colorTexture", 0);
-        renderTarget.getDepthTexture().bind(shaderProgramViewer, "depthTexture", 1);
+        renderTarget.getColorTexture().bind(shaderProgramViewer, "colorTexture", 1);
+        renderTarget.getDepthTexture().bind(shaderProgramViewer, "depthTexture", 2);
 
         // renderuj stěnu + ZAKOMENTOVANÝ GL_TRIANGLE_STRIP
         gl.glUniform1i(locMode, 0);
@@ -225,11 +225,13 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
         textRenderer.updateSize(width, height);
 
         double ratio = height / (double) width;
-        // light ortogonální projekce
+        // Ortogonální projekce
         projLight = new Mat4OrthoRH(5 / ratio, 5, 0.1, 20);
+        // projViewer = new Mat4OrthoRH(5 / ratio, 5, 0.1, 20);
 
-        // viewer perspektivní projekce
+        // Perspektivní projekce
         projViewer = new Mat4PerspRH(Math.PI / 3, ratio, 1, 20.0);
+        // projLight = new Mat4PerspRH(Math.PI / 3, ratio, 1, 20.0);
     }
 
     @Override
