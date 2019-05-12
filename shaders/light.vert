@@ -72,11 +72,11 @@ vec3 getParsur(vec2 xy) {
 
 vec3 getModifiedSphere(vec2 xy) {
     float r = 3/2;
-    float s = (PI * 10 - PI * xy.y * 2) - 1;
+    float s = (PI * 10 - PI * xy.y) - 2;
     float t = 10 * PI * xy.x;
 
     float x = r * cos(t) * cos(s);
-    float y = r * cos(t) * sin(s);
+    float y = r * cos(t) * sin(s) * sin(t);
     float z = r * sin(t);
 
     return vec3(x+2, y+0.5, z);
@@ -100,6 +100,11 @@ void main() {
     } else {
         // mode 2 parsur
         finalPos = getParsur(pos);
+//        finalPos = getModifiedSphere(pos);
+//        finalPos = getCylin(pos);
+//        finalPos = getSombrero(pos);
+//        finalPos = getSphplot2(pos);
+//        finalPos = getSphere(pos);
     }
 
     gl_Position = projLight * viewLight * vec4(finalPos, 1.0);
