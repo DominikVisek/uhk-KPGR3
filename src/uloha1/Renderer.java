@@ -1,3 +1,5 @@
+package uloha1;
+
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.GLAutoDrawable;
@@ -70,8 +72,8 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
         gl.glEnable(GL2GL3.GL_DEPTH_TEST); // zapnout z-test
 
         // načtení souborů (shaders)
-        shaderProgramLight = ShaderUtils.loadProgram(gl, "/light");
-        shaderProgramViewer = ShaderUtils.loadProgram(gl, "/start");
+        shaderProgramLight = ShaderUtils.loadProgram(gl, "/uloha1/light");
+        shaderProgramViewer = ShaderUtils.loadProgram(gl, "/uloha1/start");
 
         // create buffers vertex a index
         buffers = GridFactory.generateGrid(gl, 100, 100);

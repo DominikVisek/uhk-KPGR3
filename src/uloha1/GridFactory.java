@@ -1,3 +1,5 @@
+package uloha1;
+
 import com.jogamp.opengl.GL2GL3;
 import oglutils.OGLBuffers;
 

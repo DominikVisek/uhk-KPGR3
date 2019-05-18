@@ -6,7 +6,7 @@ REM jogl-all.jar
 REM jogl-all-natives-windows-amd64.jar or jogl-all-natives-windows-i586.jar
 
 cd ./bin
-java -classpath "./;gluegen-rt.jar;jogl-all.jar" lvl2advanced.p01run.JOGLApp
+java -classpath "./;gluegen-rt.jar;jogl-all.jar" lvl2advanced.p01run.uloha1.JOGLApp
 
 
 
