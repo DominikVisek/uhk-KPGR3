@@ -63,7 +63,7 @@ public class JOGLApp {
 	}
 
 	public static void main(String[] args) {
-		SwingUtilities.invokeLater(() -> new JOGLApp().start());
+		SwingUtilities.invokeLater(() -> new uloha2.parallax.JOGLApp().start());
 	}
 
 }

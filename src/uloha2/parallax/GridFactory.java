@@ -3,7 +3,7 @@ package uloha2.parallax;
 import com.jogamp.opengl.GL2GL3;
 import oglutils.OGLBuffers;
 
-class GridFactory {
+public class GridFactory {
 
     /**
      * @param gl gl context
@@ -11,7 +11,7 @@ class GridFactory {
      * @param n  počet vrcholů ve sloupci
      * @return OGLBuffers
      */
-    static OGLBuffers generateGrid(GL2GL3 gl, int m, int n) {
+    public static OGLBuffers generateGrid(GL2GL3 gl, int m, int n,final String shaderName) {
         float[] vb = new float[m * n * 2];
         int index = 0;
         for (int j = 0; j < n; j++) {
@@ -37,8 +37,8 @@ class GridFactory {
             }
         }
 
-        OGLBuffers.Attrib[] attributes = {
-                new OGLBuffers.Attrib("inPosition", 2) // 2 floats
+        final OGLBuffers.Attrib[] attributes = {
+                new OGLBuffers.Attrib(shaderName, 2),
         };
 
         return new OGLBuffers(gl, vb, attributes, ib);

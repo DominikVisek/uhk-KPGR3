@@ -1,44 +1,58 @@
 #version 150
-in vec3 vertColor; // input from the previous pipeline stage
-in vec4 depthTexCoord;
-in vec2 texCoord;
+in vec3 vertCoor;
+in vec3 vertNormal;
+in vec3 eyeVec;
+in vec3 lightVec;
+in vec3 spotDir;
 
-in vec3 normal;
-in vec3 light;
-in vec3 viewDirection;
-in vec3 NdotL;
+uniform sampler2D diffTex;
+uniform sampler2D normTex;
+uniform sampler2D heightTex;
+uniform float lightCutoff;
+uniform float lightDist;
 
-uniform sampler2D textureID;
-uniform sampler2D depthTexture;
-
-out vec4 outColor; // (vždy jediný) výstup z fragment shaderu
+out vec4 outColor;
 
 void main() {
-    vec4 ambient = vec4(1.0, 0.0, 0.0, 1.0);
-    vec4 diffuse = vec4(normalize(NdotL) * vec3(0.0, 1.0, 0.0), 1.0);
+    vec3 matSpecCol = vec3(1);
+    vec3 ambientLightCol = vec3(0.1);
+    vec3 directLightCol = vec3(1, 0.9, 0.9);
 
-    vec3 halfVector = normalize(normalize(light) + normalize(viewDirection));
-    float NdotH = dot(normalize(normal), halfVector);
-    vec4 specular = vec4(pow(NdotH, 16) * vec4(0.0, 0.0, 1.0, 1.0));
+    float scaleL = 0.04;
+    float scaleK = -0.02;
 
-    vec4 color = ambient + diffuse + specular;
+    vec2 texCoord = vertCoor.xy * vec2(1, -1) + vec2(0, 1);
 
-    vec4 texColor = texture(textureID, texCoord);
+    float height = texture(heightTex, texCoord).r;
+    float v = height * scaleL + scaleK;
 
-    // nejbližší pixel z pohledu světla
-    float z1 = texture(depthTexture, depthTexCoord.xy / depthTexCoord.w).r; // nutná dehomogenizace
-    // r -> v light.frag uládáme gl_FragCoord.zzz, takže jsou všechny hodnoty stejné
+    vec3 eye = normalize(eyeVec);
+    vec2 offset = eye.xy * v;
 
-    // aktuální "z" podle podle z pozice světla
-    float z2 = depthTexCoord.z / depthTexCoord.w;
+    texCoord = texCoord + offset;
 
-    bool shadow = z1 < z2 - 0.0001;
+    vec3 inNormal = texture(normTex, texCoord).xyz * 2 - 1;
 
-    if (shadow) {
-        //		outColor = vec4(1, 0, 0, 1);
-        outColor = texColor * ambient;
+    vec3 matDifCol = texture(diffTex, texCoord).xyz * vec3(0.8);
+    vec3 lVec = normalize(lightVec);
+
+    vec3 ambiComponent = ambientLightCol * matDifCol;
+
+    float difCoef = pow(max(0, lVec.z), 0.7) * max(0, dot(inNormal, lVec));
+    vec3 difComponent = directLightCol * matDifCol * difCoef;
+
+    vec3 reflected = reflect(-lVec, inNormal);
+
+    float specCoef = pow(max(0, lVec.z), 0.7) * pow(max(0, dot(normalize(eyeVec), reflected)), 70);
+    vec3 specComponent = directLightCol * matSpecCol * specCoef;
+
+    float spotEffect = max(dot(normalize(spotDir), -lVec), 0);
+    float dist = 1 - 1 / (lightDist / length(lightVec));
+
+    if (spotEffect >  lightCutoff) {
+        float blend = clamp((spotEffect -  lightCutoff) / (1 - lightCutoff), 0, 1);
+        outColor.rgb = mix(ambiComponent, ambiComponent + max(dist * (difComponent + specComponent), 0), blend);
     } else {
-        //		outColor = vec4(0, 1, 0, 1);
-        outColor = texColor * color;
+        outColor = vec4(ambiComponent, 1);
     }
 }

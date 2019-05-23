@@ -97,20 +97,12 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
     public void display(GLAutoDrawable glDrawable) {
         GL2GL3 gl = glDrawable.getGL().getGL2GL3();
 
-        renderFromViewer(gl);
-
-        textRenderer.drawStr2D(3, height - 20, text);
-        textRenderer.drawStr2D(width - 90, 3, " (c) PGRF UHK");
-
-    }
-
-    private void renderFromViewer(GL2GL3 gl) {
         gl.glUseProgram(shaderProgramViewer);
 
         gl.glBindFramebuffer(GL2GL3.GL_FRAMEBUFFER, 0);
         gl.glViewport(0, 0, width, height);
 
-        gl.glClearColor(0.0f, 0.3f, 0.0f, 1.0f);
+        gl.glClearColor(0.2f, 0.1f, 0.2f, 1.0f);
         gl.glClear(GL2GL3.GL_COLOR_BUFFER_BIT | GL2GL3.GL_DEPTH_BUFFER_BIT);
 
         // zobrazená obrysů trojuhelníku na základě hodnoty withBorder -> klávesa B
@@ -132,6 +124,10 @@ public class Renderer implements GLEventListener, MouseListener, MouseMotionList
         gl.glUniform1i(locMode, 0);
         buffers.draw(GL2GL3.GL_TRIANGLES, shaderProgramViewer);
         // buffers.draw(GL2GL3.GL_TRIANGLE_STRIP, shaderProgramViewer);
+
+        textRenderer.drawStr2D(3, height - 20, text);
+        textRenderer.drawStr2D(width - 90, 3, " (c) PGRF UHK");
+
     }
 
     @Override

@@ -1,61 +1,62 @@
 #version 150
-in vec2 inPosition;
+in vec2 inParamPos;
 
-uniform mat4 projection;
-uniform mat4 view;
-uniform vec3 lightPosition;
-uniform float time;
-uniform int mode;
-uniform mat4 lightVP;
+out vec3 vertCoor;
+out vec3 vertNormal;
+out vec3 eyeVec;
+out vec3 lightVec;
+out vec3 spotDir;
 
-out vec4 depthTexCoord;
-out vec2 texCoord;
-out vec3 normal;
-out vec3 light;
-out vec3 viewDirection;
-out vec3 NdotL;
+uniform mat4 mat;
+uniform vec3 eyePos;
+uniform vec3 lightDir;
+uniform vec3 lightPos;
 
-const float PI = 3.14;
+const float PI = 3.1415926536;
 
-// ohnutí gridu do podoby koule
-vec3 getSphere(vec2 xy) {
-    float az = xy.x * PI;
-    float ze = xy.y * PI/2; // máme od -1 do 1 a chceme od -PI/2 do PI/2
-    float r = 1;
+vec3 getSphere(vec2 paramPos) {
+    float a = 2 * PI * paramPos.x;
+    float t = PI * paramPos.y;
 
-    float x = cos(az)*cos(ze)*r;
-    float y = 2*sin(az)*cos(ze)*r;
-    float z = 0.5*sin(ze)*r;
-    return vec3(x, y, z)*1.7;
+    float x = cos(a) * sin(t);
+    float y = 2*sin(a) * sin(t);
+    float z = 0.5 * cos(t);
+
+    return vec3(x, y, z);
 }
 
-vec3 getSphereNormal(vec2 xy) {
-    vec3 u = getSphere(xy + vec2(0.001, 0)) - getSphere(xy - vec2(0.001, 0));
-    vec3 v = getSphere(xy + vec2(0, 0.001)) - getSphere(xy - vec2(0, 0.001));
-    return cross(u, v);
+vec3 getSphereNormal(vec2 paramPos) {
+    float d = 1e-5;
+    vec2 dx = vec2(d, 0);
+    vec2 dy = vec2(0, d);
+    vec3 tx = (getSphere(paramPos + dx) - getSphere(paramPos - dx)) / (2 * d);
+    vec3 ty = (getSphere(paramPos + dy) - getSphere(paramPos - dy)) / (2 * d);
+    return cross(ty, tx);
+}
+
+mat3 tangentMat(vec2 paramPos) {
+    float d = 1e-5;
+    vec2 dx = vec2(d, 0);
+    vec2 dy = vec2(0, d);
+    vec3 tx = (getSphere(paramPos + dx) - getSphere(paramPos - dx)) / (2 * d);
+    vec3 ty = (getSphere(paramPos + dy) - getSphere(paramPos - dy)) / (2 * d);
+    vec3 x = normalize(tx);
+    vec3 y = normalize(-ty);
+    vec3 z = cross(x, y);
+    x = cross(y, z);
+    return mat3(x,y,z);
 }
 
 void main() {
-    vec2 pos = inPosition * 2 - 1;
-    vec3 finalPos;
+    vec3 vertPosition = getSphere(inParamPos);
+    gl_Position = mat * vec4(vertPosition, 1.0);
 
-    finalPos = getSphere(pos);
-    normal = getSphereNormal(pos);
+    vertNormal = getSphereNormal(inParamPos);
 
-    gl_Position = projection * view * vec4(finalPos, 1.0);
+    mat3 tanMat = tangentMat(inParamPos);
+    eyeVec = (eyePos - vertPosition) * tanMat;
+    lightVec = (lightPos - vertPosition) * tanMat;
+    spotDir = (lightDir - vertPosition) * tanMat;
 
-    light = lightPosition - finalPos;
-    NdotL = vec3(dot(normal, light));
-
-    // získání pozice kamery z view matice
-    // (kamera je pohled třetí osoby a tudíž její pozice je v počátku - proto nutné použít view matici)
-    mat4 invView = inverse(view);
-    vec3 eyePosition = vec3(invView[3][0], invView[3][1], invView[3][2]);
-
-    viewDirection = eyePosition - finalPos;
-
-    texCoord = inPosition;
-
-    depthTexCoord = lightVP * vec4(finalPos, 1.0);
-    depthTexCoord.xyz = (depthTexCoord.xyz + 1) / 2; // obrazovka má rozsahy <-1;1>
+    vertCoor = vec3(inParamPos,0);
 }
