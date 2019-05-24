@@ -1,16 +1,12 @@
 #version 150
-in vec3 vertColor;// input from the previous pipeline stage
-in vec4 depthTexCoord;
-in vec2 texCoord;
 
-in vec3 viewDirection;
-in vec3 NdotL;
+in vec2 texCoord;
 in vec3 normal;
 
 uniform sampler2D textureID;
 uniform sampler2D depthTexture;
 
-out vec4 outColor;// (vždy jediný) výstup z fragment shaderu
+out vec4 outColor;
 
 mat4 rotationMatrix(vec3 axis, float angle){
     axis = normalize(axis);
@@ -25,6 +21,7 @@ mat4 rotationMatrix(vec3 axis, float angle){
     oc * axis.z * axis.x - axis.y * s, oc * axis.y * axis.z + axis.x * s,
     oc * axis.z * axis.z + c, 1.0, 1.0, 1.0, 1.0, 1.0);
 }
+
 vec3 bump2(vec2 xy, vec3 normal){
     float BumpDensity = 80; float BumpSize = 0.2;
     vec2 p = fract(BumpDensity*xy) - vec2(0.5);
